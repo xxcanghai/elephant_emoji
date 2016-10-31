@@ -1,0 +1,61 @@
+在Chrome下有一Tampermonkey的插件，管理油猴子脚本，本身也自带一个编辑器，但是用它的编辑器功能上总有缺陷，而Tampermonkey（以下简称“TM"）又不能直接调用磁盘的上的脚本，所以通过特殊方式实现用外部编辑器编辑磁盘上的js文件，然后Tampermoney自动加载自动调用。
+以下来自TM的论坛
+
+@require tag能够调用到本地磁盘上的文件，使用这种@require方法可能会有延迟。
+具体方法：
+
+打开Chrome扩展管理，勾选TM“允许访问文件网址”
+进入TM管理，添加一个新脚本
+打开文件管理器，找到脚本存放位置
+用中意的编辑器打开脚本
+复制脚本Header，在新脚本提交
+复制脚本在本机存放的位置
+在TM中新建的脚本Header位置插入新行 ---- ”//@require file://<path>/<filename>"
+保存TM中新脚本，然后就结束了。
+
+我将英文贴在下面：
+first go to Chrome's extensions page and check if the "Allow access to file URLs" setting is enabled for TM
+now goto TM's context menu and click at "Add a new script..." a new TM options tab opens
+open the file browser (Explorer, Nautilus, ...) and go to the location where the script is placed
+open your script with your prefered (external) editor
+copy the userscript header (only the header is needed!) to TM's options tab
+go to the file browser and click at the address bar (Explorer) or press CTRL-L (Nautilus)
+copy the path and go back to TM's options tab
+insert a new line with a valid path and filename to the userscript header: "@require file://<path>/<filename>"
+save the newly added script and you're done!
+一个例子：假设你的脚本在C:\Users\janb\Documents\Scripts\test.js 并且开头如下：
+// ==UserScript==
+// @name Test'Em'All
+// @namespace http://tampermonkey.net/empty.html
+// @version 0.1
+// @description this does nothing but giving a good example
+// @match http://tampermonkey.net/empty.html
+// ==/UserScript==
+
+console.log("running at " + window.location.href);
+// Normal script now do a lot of other things...
+
+接下来你在TM中创建一个新脚本，内容如下：
+// ==UserScript==
+// @name Test'Em'All
+// @namespace http://tampermonkey.net/empty.html
+// @version 0.1
+// @description this does nothing but giving a good example
+// @match http://tampermonkey.net/empty.html
+// @require file://C:\Users\janb\Documents\Scripts\test.js
+// ==/UserScript==
+结束
+现在你就可以编辑本地”C:\Users\janb\Documents\Scripts\test.js“的文件，所有修改都会及时的反映到“http://tampermonkey.net/empty.html”这个网址。
+
+几个注意点：
+
+一定注意将TM的允许访问本地文件勾选上～
+如果你的本地地址中文件夹有空格，用 %20 代替 ，例如“file://C:\Eigene%20Dateien\test.js”
+你的本地文件不要以 user.js 结尾，user.js文件会被Chrome接管，TM不能接受到～
+
+给Linux用户的注意点：
+不要用“~”来表示home directory
+在路径开始的时候加“/“ 例如：”file:///home/janb/Documents/test.js“
+
+最后再一次感谢TM的开发人员。
+TM的一片通用教程
