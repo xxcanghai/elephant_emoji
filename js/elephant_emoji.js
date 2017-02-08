@@ -1,124 +1,77 @@
-//基础类库
-var xxcanghai;
-(function (xxcanghai) {
+var xxcanhgai;
+(function (xxcanhgai) {
     /**
-     * 封装的数据操作对象类
+     * 载入jquery
      *
-     * @interface indexedDBObject
+     * @export
+     * @param {() => void} [onload=function () { }]
      */
-    var indexedDBObject = (function () {
-        function indexedDBObject(name, version) {
-            this.name = name;
-            this.version = version;
-            this.db = null;
+    function loadJQuery(onload) {
+        if (onload === void 0) { onload = function () { }; }
+        var jquerySrc = "http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js";
+        var t = new Date().getTime();
+        if (typeof window["jQuery"] == "undefined") {
+            var jqueryScript = document.createElement("script");
+            jqueryScript.onload = function (e) {
+                // console.info("jquery loaded!", $);
+                onload();
+            };
+            jqueryScript.src = jquerySrc;
+            document.getElementsByTagName("body")[0].appendChild(jqueryScript);
         }
-        indexedDBObject.prototype.openDB = function (onSuccess) {
-            onSuccess = typeof onSuccess === "function" ? onSuccess : function () { };
-            var dbObj = this;
-            var request = window.indexedDB.open(this.name, this.version);
-            request.addEventListener("success", function (e) {
-                var that = this;
-                // console.log("openDB", e.type, e);
-                var db = e.target.result;
-                dbObj.db = db;
-                //----------
-                onSuccess.call(that, db);
+        else {
+            onload();
+        }
+    }
+    /**
+     * 执行初始化
+     *
+     * @export
+     */
+    function init() {
+        loadJQuery(function () {
+            $(function () {
+                var timerid = setInterval(function () {
+                    if ($(".smiley-container").length > 0) {
+                        realyInit();
+                        clearInterval(timerid);
+                    }
+                }, 10);
             });
-            request.addEventListener("upgradeneeded", function (e) {
-                var that = this;
-                console.log("openDB", e.type, e);
-                var db = e.target.result;
-            });
-            return request;
-        };
-        /**
-         * 关闭数据库
-         *
-         * @export
-         * @returns {void}
-         */
-        indexedDBObject.prototype.closeDB = function () {
-            return this.db.close();
-        };
-        /**
-         * 删除数据库
-         *
-         * @export
-         * @returns {IDBOpenDBRequest}
-         */
-        indexedDBObject.prototype.deleteDB = function () {
-            return window.indexedDB.deleteDatabase(this.name);
-        };
-        /**
-         * 添加储存空间（表）
-         *
-         * @param {string} storeName 存储空间名称（表名）
-         * @param {IDBObjectStoreParameters} config 存储空间配置对象
-         */
-        indexedDBObject.prototype.addObjectStore = function (storeName, config, onSuccess) {
-            if (config === void 0) { config = {}; }
-            onSuccess = typeof onSuccess === "function" ? onSuccess : function () { };
-            this.version += 1;
-            var dbObj = this;
-            var request = window.indexedDB.open(this.name, this.version);
-            request.addEventListener("upgradeneeded", function (e) {
-                var cfg = $.extend(true, { autoIncrement: false, keyPath: "_id" }, config);
-                if (!dbObj.db.objectStoreNames.contains(storeName)) {
-                    dbObj.db.createObjectStore(storeName, cfg);
-                }
-                onSuccess.call(this, e);
-            });
-        };
-        indexedDBObject.prototype.addData = function (storeName, data, onSuccess) {
-            onSuccess = typeof onSuccess === "function" ? onSuccess : function () { };
-            var transaction = this.db.transaction(storeName, "readwrite");
-            var store = transaction.objectStore(storeName);
-            var request = store.add(data);
-            request.addEventListener("success", function (e) {
-                return onSuccess.call(this, e);
-            });
-        };
-        /**
-         * 为操作进行数据操作时的request请求增加log日志
-         *
-         * @param {IDBOpenDBRequest} request
-         * @param {string} openMessage
-         *
-         * @memberOf indexedDBObject
-         */
-        indexedDBObject.prototype.setEventLog = function (request, openMessage) {
-            if (openMessage === void 0) { openMessage = ""; }
-            request.addEventListener("error", function (e) {
-                var that = this;
-                console.log(openMessage || "openDB", e.type, e);
-            });
-            request.addEventListener("success", function (e) {
-                var that = this;
-                // console.log(openMessage || "openDB", e.type, e);
-            });
-            // request.addEventListener("upgradeneeded", function (e: IDBVersionChangeEvent) {
-            //     var that: IDBOpenDBRequest = this;
-            //     console.log(openMessage || "openDB", e.type, e);
-            // });
-            request.addEventListener("blocked", function (e) {
-                var that = this;
-                console.log(openMessage || "openDB", e.type, e);
-            });
-        };
-        return indexedDBObject;
-    }());
-    xxcanghai.indexedDBObject = indexedDBObject;
-})(xxcanghai || (xxcanghai = {}));
-//业务逻辑
-var xxcanghai;
-(function (xxcanghai) {
-    // window.indexedDB.deleteDatabase("emojiDB");
-    var emojiDB = new xxcanghai.indexedDBObject("emojiDB", 1);
-    var request = emojiDB.openDB(function (result) {
-        // console.log(result, emojiDB.db);
-        emojiDB.addObjectStore("person", {}, function () {
-            emojiDB.addData("person", { name: "jicanghai", age: 200 });
-            emojiDB.addData("person", { name: "sunyingying", age: 300 });
         });
-    });
-})(xxcanghai || (xxcanghai = {}));
+    }
+    xxcanhgai.init = init;
+    function realyInit() {
+        bind();
+        console.info("elephant_emoji ready!");
+    }
+    function bind() {
+        $(".smiley-container").click(delayBind(smiley_container_click));
+    }
+    function smiley_container_click(e) {
+        var $smiley_tabbar = $(".smiley-tabbar");
+        var $tabbar_item = $('<div class="tabbar-item elephant_emoji" title="表情收藏"><img src="https://file.sankuai.com/pan/im/1/image/AQdD8ukZtwpb_PAKXwAAElX88AsC@640w_1l?w=640&h=642" style="width: 20px; height: 20px;"></div>');
+        if ($(".tabbar-item.elephant_emoji").length > 0)
+            return;
+        $smiley_tabbar.find(".tabbar-item").last().after($tabbar_item);
+    }
+    /**
+     * 返回将函数延迟指定时间的新函数
+     *
+     * @param {Function} [fn=function () { }]
+     * @param {number} [time=10]
+     * @returns
+     */
+    function delayBind(fn, time) {
+        if (fn === void 0) { fn = function () { }; }
+        if (time === void 0) { time = 10; }
+        return function () {
+            var that = this;
+            var args = [].slice.call(arguments);
+            setTimeout(function () {
+                return fn.apply(that, args);
+            }, time);
+        };
+    }
+})(xxcanhgai || (xxcanhgai = {}));
+xxcanhgai.init();
